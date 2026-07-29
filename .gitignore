@@ -1,0 +1,12 @@
+# Diagnostics, off by default. spoken.log in particular is a verbatim record of
+# everything read aloud to you - never commit it.
+fired.log
+spoken.log
+*.log.1
+
+# Bytecode, from importing play.py during testing
+__pycache__/
+*.pyc
+
+# Working notes for this repo, not shipped
+CLAUDE.md
