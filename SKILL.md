@@ -77,6 +77,13 @@ dashes become commas, and link text survives while the URL doesn't.
 while text is being displayed, so it arrives in pieces and would need buffering.
 `Stop` gives one whole message.
 
+**A rejected Edit is spoken from the batch branch, not the failure branch**, since
+it reaches no other hook. That branch reassigns `event` to `tool-error` to borrow
+its sound, so the generic failure handler is guarded on `hook_event_name` being
+`PostToolUseFailure` rather than on `event`. Without that guard it ran too, on a
+payload with no `tool_name` at the top level, and said "A tool failed." over the
+sentence that named the file and the reason.
+
 **Speaking straight from the hook produces silence.** The NVDA controller reports
 success, `fired.log` says the line was spoken, and nothing is heard - while the
 identical call from a terminal speaks fine. Claude Code renders the finished

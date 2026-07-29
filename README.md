@@ -30,6 +30,13 @@ nothing else, so you had to go and read it before you could answer. Now you hear
 "Permission needed to run: deleting the build folder", or the question with its
 options numbered.
 
+**Failures say what broke.** "Edit failed on config.json. String to replace not
+found in file." A sound tells you something went wrong; it doesn't tell you what,
+and going to look is the thing this is meant to save you.
+
+**Task events say which task.** "Task created: fix the parser." Not just a chime
+that something happened to something.
+
 **It stops talking when you leave.** Speech only happens while Claude Code is the
 focused window. A tone from a background window is information; a sentence talking
 over what you're reading somewhere else is not. A closing message you missed
@@ -74,6 +81,8 @@ which you do for anything you change in `hooks/hooks.json`.
 | `speak_final_message` | `true` | Read the message that ends a turn. |
 | `speak_tools` | `true` | Announce each tool as it runs. |
 | `speak_prompts` | `true` | Read permission prompts and questions. |
+| `speak_failures` | `true` | Say which tool failed and why. |
+| `speak_tasks` | `true` | Say which task was created or completed. |
 | `speak_only_when_focused` | `true` | Stay quiet when Claude Code isn't the focused window. |
 | `focus_process_names` | `claude.exe`, `code.exe`, `windowsterminal.exe` | Which windows count as focused. |
 | `speak_max_chars` | `0` | Truncate long messages. 0 means never. |

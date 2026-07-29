@@ -410,6 +410,50 @@ def phrase_for(event, payload):
     return ""
 
 
+def first_line(text, limit=140):
+    """The first useful line of an error, short enough to be worth hearing."""
+    line = " ".join(str(text or "").split())
+    line = line.replace("<tool_use_error>", "").replace("</tool_use_error>", "")
+    line = line.strip()
+    if len(line) > limit:
+        cut = line.rfind(" ", 0, limit)
+        line = line[:cut if cut > limit // 2 else limit] + "..."
+    return line
+
+
+def failure_phrase(tool, tool_input, error, interrupted=False):
+    """
+    What to say when a tool fails.
+
+    A tone told you something broke but never what, so you had to go and look -
+    which is the whole thing this is meant to save you. The error text is the
+    useful part: "exit code 9" or "string to replace not found" ends the guessing
+    immediately.
+    """
+    if interrupted:
+        return f"{tool or 'Tool'} interrupted."
+    tool_input = tool_input or {}
+    where = ""
+    if tool_input.get("file_path"):
+        where = f" on {os.path.basename(str(tool_input['file_path']))}"
+    elif tool in ("Bash", "PowerShell") and tool_input.get("description"):
+        where = f", {tool_input['description']}"
+    detail = first_line(error)
+    return f"{tool or 'A tool'} failed{where}. {detail}".strip()
+
+
+def task_phrase(event, payload):
+    """
+    Task events made a sound and said nothing, so you knew something happened to
+    a task but not which one or what. The subject is the whole point.
+    """
+    subject = str(payload.get("task_subject", "")).strip()
+    number = str(payload.get("task_id", "")).strip()
+    what = subject or (f"task {number}" if number else "a task")
+    return ("Task created: " if event == "task-created" else
+            "Task completed: ") + what
+
+
 def permission_phrase(payload):
     """
     What to say when something is waiting on an answer.
@@ -762,9 +806,20 @@ def main():
             # worse than not reporting it. Borrow tool-error's sound instead.
             silent = [c for c in payload["tool_calls"]
                       if c.get("tool_use_id") not in announced]
-            if silent and any(failed(c) for c in silent):
+            broken = [c for c in silent if failed(c)]
+            if broken:
                 event = "tool-error"
                 log("tool-batch: unannounced failure, using the error sound")
+                # This is the only hook a rejected Edit reaches, so it is also
+                # the only chance to say what went wrong.
+                if cfg.get("speak_failures") and not test and listening(cfg):
+                    call = broken[0]
+                    phrase = failure_phrase(call.get("tool_name"),
+                                            call.get("tool_input"),
+                                            call.get("tool_response"))
+                    speak_detached(phrase, num(cfg, "speak_tool_delay_ms", 350),
+                                   interrupt=True)
+                    log(f"said {phrase!r}")
 
     path = pick(event, cfg)
     if path is None:
@@ -814,6 +869,33 @@ def main():
             except Exception:
                 pass
             log(f"speak held, focus is {foreground_exe() or 'unknown'}")
+
+    # Guarded on the real hook name, not on `event`, because the batch branch
+    # above reassigns event to "tool-error" to borrow its sound. Without this
+    # the generic version ran too, on a payload that has no tool_name at the top
+    # level, and said "A tool failed." over the useful sentence.
+    if event == "tool-error" and payload.get("hook_event_name") \
+            == "PostToolUseFailure" and cfg.get("speak_failures") and not test:
+        phrase = failure_phrase(payload.get("tool_name"),
+                                payload.get("tool_input"),
+                                payload.get("error"),
+                                payload.get("is_interrupt"))
+        if listening(cfg):
+            speak_detached(phrase, num(cfg, "speak_tool_delay_ms", 350),
+                           interrupt=True)
+            log(f"said {phrase!r}")
+        else:
+            log(f"failure not said, focus is {foreground_exe() or 'unknown'}")
+
+    if event in ("task-created", "task-completed") and cfg.get("speak_tasks") \
+            and not test:
+        phrase = task_phrase(event, payload)
+        if listening(cfg):
+            speak_detached(phrase, num(cfg, "speak_tool_delay_ms", 350),
+                           interrupt=True)
+            log(f"said {phrase!r}")
+        else:
+            log(f"task not said, focus is {foreground_exe() or 'unknown'}")
 
     if event == "permission-request" and cfg.get("speak_prompts") and not test:
         phrase = permission_phrase(payload)

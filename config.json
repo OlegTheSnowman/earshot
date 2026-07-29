@@ -8,6 +8,8 @@
   "speak_delay_ms": 1200,
   "speak_tools": true,
   "speak_prompts": true,
+  "speak_failures": true,
+  "speak_tasks": true,
   "speak_prompt_delay_ms": 900,
   "speak_tool_delay_ms": 350,
   "speak_only_when_focused": true,
