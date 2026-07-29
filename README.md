@@ -68,6 +68,26 @@ has `ffplay` or a system player. If you're on macOS or Linux and want this kind 
 thing today, [claude-sonar](https://github.com/vylasaven/claude-sonar) covers those
 platforms and has done for longer than Earshot has existed.
 
+## What it reads and runs
+
+Worth knowing before you install anything that hooks every event.
+
+To speak the closing message, Earshot reads the tail of your session transcript.
+Claude Code hands it the path in the `Stop` payload, and there is nowhere else the
+message exists. It reads the last 400KB, takes the closing text, and keeps
+nothing.
+
+Nothing is sent anywhere. There is no network access in any of the scripts. The
+only files written are the two logs, both off by default, and a short-lived temp
+file holding the sentence being spoken, which the speaking process deletes.
+
+It runs `ffplay` if you have it, falls back to PowerShell's media player, and
+spawns a detached copy of `play.py` to speak. That's all the process creation
+there is.
+
+`spoken.log` is the one to be careful with. When enabled it records every message
+read aloud to you, verbatim. It's off by default and gitignored.
+
 ## Settings
 
 Everything lives in `config.json` next to this file, and it's re-read on every
