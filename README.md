@@ -1,5 +1,8 @@
 # Earshot
 
+![Lint](https://github.com/OlegTheSnowman/earshot/actions/workflows/lint.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 Earshot tells you what Claude Code is doing without you having to look. Every
 event gets its own short sound, and the things worth words get read out through
 your screen reader: the message at the end of a turn, each tool as it runs, and
