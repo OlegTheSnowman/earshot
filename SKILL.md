@@ -120,6 +120,14 @@ seconds apart. A genuine subagent names itself in `agent_type`; the phantom one
 leaves it empty. `play.py` drops both `subagent-start` and `subagent-done` when
 that field is empty. Do not remove that guard without re-checking `fired.log`.
 
+**A subagent's own tool calls fire these hooks too.** One dispatched agent
+turned a quiet turn into a stream of reads, greps and edits announced one by
+one, none of it the session's own work. A subagent payload carries `agent_id`
+(and `agent_type`); a call made in the session itself carries neither, which is
+what the guard matches on. `subagent-start` and `subagent-done` are exempt -
+they fire in the parent and are the only thing that says an agent is running.
+Set `announce_subagent_tools` to true to hear the calls again.
+
 `tool-done` and `tool-batch` are for the tool calls that *didn't* announce
 themselves. A Read plays its own sound before it runs, so the generic done sound
 on top of it was two notes at once, three in a batch. When a `pre-*` sound plays,

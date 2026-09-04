@@ -756,6 +756,19 @@ def main():
     if event in ("subagent-start", "subagent-done") and not payload.get("agent_type"):
         return
 
+    # Every hook a subagent's own tool calls trigger arrives here too, so a
+    # single dispatched agent turned a quiet turn into a stream of reads,
+    # greps and edits announced one by one - none of them this session's work.
+    # A subagent payload names the agent in agent_id; a call made in the
+    # session itself has no such field. The lifecycle pair is exempt because
+    # it fires in the parent and is the only thing that says an agent is
+    # running at all. Set announce_subagent_tools to hear the calls again.
+    if payload.get("agent_id") and event not in ("subagent-start", "subagent-done"):
+        if not cached_config().get("announce_subagent_tools", False):
+            log(f"{event} skipped, {payload.get('tool_name') or 'call'} "
+                f"belongs to subagent {payload.get('agent_type') or '?'}")
+            return
+
     cfg = load_config()
     if not cfg.get("enabled", True):
         return

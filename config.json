@@ -12,6 +12,7 @@
   "speak_tasks": true,
   "speak_prompt_delay_ms": 900,
   "speak_tool_delay_ms": 350,
+  "announce_subagent_tools": false,
   "speak_only_when_focused": true,
   "focus_process_names": ["claude.exe", "code.exe", "windowsterminal.exe"],
   "_comment": "One event name per sound. Where a Claude Code hook supports matchers, each matcher gets its own event name here and its own entry in hooks/hooks.json - that keeps this file a flat map with no matching logic in play.py. A list of several files means one is picked at random, never the same one twice in a row. Remap freely; the only rule is that the filenames exist.",

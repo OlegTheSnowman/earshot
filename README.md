@@ -106,6 +106,7 @@ which you do for anything you change in `hooks/hooks.json`.
 | `speak_prompts` | `true` | Read permission prompts and questions. |
 | `speak_failures` | `true` | Say which tool failed and why. |
 | `speak_tasks` | `true` | Say which task was created or completed. |
+| `announce_subagent_tools` | `false` | Announce tool calls made inside a subagent. |
 | `speak_only_when_focused` | `true` | Stay quiet when Claude Code isn't the focused window. |
 | `focus_process_names` | `claude.exe`, `code.exe`, `windowsterminal.exe` | Which windows count as focused. |
 | `speak_max_chars` | `0` | Truncate long messages. 0 means never. |
